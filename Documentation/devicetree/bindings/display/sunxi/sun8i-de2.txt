@@ -1,0 +1,121 @@
+Allwinner sun8i Display Engine 2 subsystem
+==========================================
+
+The Allwinner DE2 subsystem contains a display controller (DE2),
+one or two LCD controllers (Timing CONtrollers) and their external
+interfaces (encoders/connectors).
+
+          +-----------+
+          | DE2       |
+          |           |
+          | +-------+ |
+  plane --->|       | |   +------+
+          | | mixer |---->| TCON |---> encoder  ---> display
+  plane --->|       | |   +------+     connector     device
+          | +-------+ |
+          |           |
+          | +-------+ |
+  plane --->|       | |   +------+
+          | | mixer |---->| TCON |---> encoder  ---> display
+  plane --->|       | |   +------+     connector     device
+          | +-------+ |
+          +-----------+
+
+The DE2 contains a processor which mixes the input planes and creates
+the images which are sent to the TCONs.
+From the software point of vue, there are 2 independent real-time
+mixers, each one being statically associated to one TCON.
+
+The TCONs adjust the image format to the one of the display device.
+
+Display controller (DE2)
+========================
+
+Required properties:
+
+- compatible: value should be one of the following
+		"allwinner,sun8i-a83t-display-engine"
+		"allwinner,sun8i-h3-display-engine"
+
+- reg: base address and size of the I/O memory
+
+- clocks: must include clock specifiers corresponding to entries in the
+		clock-names property.
+
+- clock-names: must contain
+		"bus": bus gate
+		"clock": clock
+
+- resets: phandle to the reset of the device
+
+- ports: must contain a list of 2 phandles, indexed by mixer number,
+	and pointing to display interface ports of TCONs
+
+LCD controller (TCON)
+=====================
+
+Required properties:
+
+- compatible: should be
+		"allwinner,sun8i-a83t-tcon"
+
+- reg: base address and size of the I/O memory
+
+- clocks: must include clock specifiers corresponding to entries in the
+		clock-names property.
+
+- clock-names: must contain
+		"bus": bus gate
+		"clock": pixel clock
+
+- resets: phandle to the reset of the device
+
+- interrupts: interrupt number for the TCON
+
+- port: port node with endpoint definitions as defined in
+	Documentation/devicetree/bindings/media/video-interfaces.txt
+
+Example:
+
+	de: de-controller@01000000 {
+		compatible = "allwinner,sun8i-h3-display-engine";
+		reg = <0x01000000 0x400000>;
+		clocks = <&ccu CLK_BUS_DE>, <&ccu CLK_DE>;
+		clock-names = "bus", "clock";
+		resets = <&ccu RST_BUS_DE>;
+		ports = <&tcon0_p>, <&tcon1_p>;
+	};
+
+	tcon0: lcd-controller@01c0c000 {
+		compatible = "allwinner,sun8i-a83t-tcon";
+		reg = <0x01c0c000 0x400>;
+		clocks = <&ccu CLK_BUS_TCON0>, <&ccu CLK_TCON0>;
+		clock-names = "bus", "clock";
+		resets = <&ccu RST_BUS_TCON0>;
+		interrupts = <GIC_SPI 86 IRQ_TYPE_LEVEL_HIGH>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		tcon0_p: port {
+			tcon0_hdmi: endpoint {
+				remote-endpoint = <&hdmi_tcon0>;
+			};
+		};
+	};
+
+	/* not used */
+	tcon1: lcd-controller@01c0d000 {
+		compatible = "allwinner,sun8i-h3-tcon";
+		reg = <0x01c0d000 0x400>;
+		clocks = <&ccu CLK_BUS_TCON1>,
+			 <&ccu CLK_TCON0>;	/* no clock */
+		clock-names = "bus", "clock";
+		interrupts = <GIC_SPI 87 IRQ_TYPE_LEVEL_HIGH>;
+		status = "disabled";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		tcon1_p: port {
+			endpoint {
+				/* empty */
+			};
+		};
+	};
