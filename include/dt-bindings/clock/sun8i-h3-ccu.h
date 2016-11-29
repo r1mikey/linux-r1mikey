@@ -44,6 +44,7 @@
 #define _DT_BINDINGS_CLK_SUN8I_H3_H_
 
 #define CLK_CPUX		14
+#define CLK_PLL_DE		13
 
 #define CLK_BUS_CE		20
 #define CLK_BUS_DMA		21
