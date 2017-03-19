@@ -44,6 +44,7 @@
 
 #include <dt-bindings/clock/sun50i-a64-ccu.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/clock/sun50i-a64-ccu.h>
 #include <dt-bindings/reset/sun50i-a64-ccu.h>
 
 / {
